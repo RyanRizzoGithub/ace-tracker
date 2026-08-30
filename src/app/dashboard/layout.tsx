@@ -24,7 +24,7 @@ export default async function DashboardLayout({
               <span className="hidden text-[var(--sand-mid)] sm:inline">|</span>
               <Link
                 href="/dashboard"
-                className="serif hidden text-lg text-[var(--ink)] sm:inline"
+                className="serif hidden text-lg font-semibold text-[var(--ink)] sm:inline"
               >
                 ACE Tracker
               </Link>
