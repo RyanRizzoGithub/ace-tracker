@@ -1,23 +1,23 @@
-/** Stable colors per archetype, used across charts and badges. */
+/** Stable colors per archetype — muted, earthy tones that sit on the sand palette. */
 export const ARCHETYPE_COLORS: Record<string, string> = {
-  convincer: "#4f46e5",
-  driver: "#0891b2",
-  negotiator: "#059669",
-  inquisitor: "#d97706",
-  "friend-maker": "#db2777",
-  "peace-keeper": "#7c3aed",
+  convincer: "#0f6e56", // teal
+  driver: "#185fa5", // blue
+  negotiator: "#993c1d", // coral
+  inquisitor: "#b7791f", // ochre
+  "friend-maker": "#7a4e6e", // plum
+  "peace-keeper": "#5f7a52", // sage
 };
 
 /** A small ordered palette for plotting several traits at once. */
 export const TRAIT_PALETTE = [
-  "#4f46e5",
-  "#0891b2",
-  "#059669",
-  "#d97706",
-  "#db2777",
-  "#7c3aed",
-  "#dc2626",
-  "#2563eb",
+  "#0f6e56",
+  "#185fa5",
+  "#993c1d",
+  "#b7791f",
+  "#7a4e6e",
+  "#5f7a52",
+  "#0c447c",
+  "#b8563e",
 ];
 
 export const CONFIDENCE_COLORS = {

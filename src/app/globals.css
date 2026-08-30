@@ -1,18 +1,41 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f7f9;
+  /* Warm editorial palette (Thoughtly) */
+  --sand: #f5f2ed;
+  --sand-mid: #e8e4dc;
+  --background: #f5f2ed;
   --surface: #ffffff;
-  --foreground: #14151a;
-  --muted: #6b7280;
-  --border: #e6e7eb;
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
-  --primary-soft: #eef2ff;
-  --ac: #4f46e5; /* authentic confidence */
-  --oc: #dc2626; /* over confidence */
-  --uc: #d97706; /* under confidence */
-  --ring: rgba(79, 70, 229, 0.35);
+
+  --ink: #1a1a18;
+  --ink-mid: #4a4a46;
+  --ink-light: #8a8a84;
+  --foreground: #1a1a18;
+  --muted: #8a8a84;
+  --border: #e8e4dc;
+
+  /* Teal is the brand / primary */
+  --teal-dark: #0f6e56;
+  --teal-deep: #085041;
+  --teal-light: #e8f5f3;
+  --teal-border: #9fe1cb;
+  --primary: #0f6e56;
+  --primary-hover: #085041;
+  --primary-soft: #e8f5f3;
+
+  /* Confidence types: authentic = teal, over = coral, under = blue */
+  --ac: #0f6e56;
+  --oc: #993c1d;
+  --uc: #185fa5;
+
+  --coral: #993c1d;
+  --coral-light: #faf0eb;
+  --coral-border: #f5c4b3;
+  --coral-dark: #712b13;
+
+  --ring: rgba(15, 110, 86, 0.28);
+  --radius: 12px;
+  --radius-sm: 8px;
 }
 
 @theme inline {
@@ -22,22 +45,47 @@
   --color-muted: var(--muted);
   --color-border: var(--border);
   --color-primary: var(--primary);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-dm-sans);
+  --font-serif: var(--font-dm-serif);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-dm-sans), system-ui, -apple-system, sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer base {
+  h1,
+  h2 {
+    font-family: var(--font-dm-serif), Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
 }
 
 @layer components {
+  .serif {
+    font-family: var(--font-dm-serif), Georgia, serif;
+    font-weight: 400;
+  }
+
+  /* Tiny uppercase eyebrow label */
+  .eyebrow {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+  }
+
   .card {
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 0.875rem;
-    box-shadow: 0 1px 2px rgba(16, 17, 26, 0.04);
+    border: 1px solid var(--sand-mid);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 16px rgba(26, 25, 23, 0.04);
   }
 
   .btn {
@@ -45,45 +93,48 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    border-radius: 0.625rem;
-    padding: 0.55rem 1rem;
+    border-radius: var(--radius-sm);
+    padding: 0.65rem 1.1rem;
     font-size: 0.9rem;
-    font-weight: 600;
+    font-weight: 500;
+    letter-spacing: 0.01em;
     transition: background-color 0.15s, border-color 0.15s, color 0.15s;
     cursor: pointer;
   }
   .btn-primary {
-    background: var(--primary);
+    background: var(--teal-dark);
     color: #fff;
   }
   .btn-primary:hover {
-    background: var(--primary-hover);
+    background: var(--teal-deep);
   }
   .btn-primary:disabled {
-    opacity: 0.55;
+    opacity: 0.5;
     cursor: not-allowed;
   }
   .btn-ghost {
-    background: transparent;
-    color: var(--foreground);
-    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink-mid);
+    border: 1px solid var(--sand-mid);
   }
   .btn-ghost:hover {
-    background: #f2f3f7;
+    background: var(--sand);
+    color: var(--ink);
   }
 
   .input {
     width: 100%;
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 0.625rem;
-    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--sand-mid);
+    border-radius: var(--radius-sm);
+    padding: 0.6rem 0.8rem;
     font-size: 0.9rem;
-    color: var(--foreground);
+    color: var(--ink);
+    font-family: var(--font-dm-sans), sans-serif;
   }
   .input:focus {
     outline: none;
-    border-color: var(--primary);
+    border-color: var(--teal-dark);
     box-shadow: 0 0 0 3px var(--ring);
   }
 
@@ -92,9 +143,9 @@ body {
     align-items: center;
     gap: 0.35rem;
     border-radius: 999px;
-    padding: 0.15rem 0.6rem;
+    padding: 0.2rem 0.65rem;
     font-size: 0.72rem;
-    font-weight: 600;
+    font-weight: 500;
     letter-spacing: 0.02em;
   }
 }

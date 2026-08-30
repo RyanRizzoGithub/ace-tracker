@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import BrandLogo from "@/components/BrandLogo";
 
 type Mode = "signin" | "signup";
 
@@ -68,12 +68,9 @@ export default function LoginPage() {
   return (
     <main className="flex flex-1 items-center justify-center px-6 py-20">
       <div className="w-full max-w-sm">
-        <Link
-          href="/"
-          className="mb-8 block text-center text-sm font-semibold text-[var(--muted)]"
-        >
-          ← ACE Tracker
-        </Link>
+        <div className="mb-8 flex justify-center">
+          <BrandLogo height={40} />
+        </div>
         <div className="card p-7">
           <h1 className="text-xl font-semibold">
             {mode === "signup" ? "Create your account" : "Sign in"}
