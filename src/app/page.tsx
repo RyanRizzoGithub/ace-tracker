@@ -26,7 +26,7 @@ export default async function Home() {
           <p className="eyebrow mb-4 text-[var(--teal-dark)]">
             Confidence Profile · progress over time
           </p>
-          <h1 className="text-4xl leading-tight sm:text-5xl">ACE Tracker</h1>
+          <h1 className="serif text-4xl leading-tight sm:text-5xl">ACE Tracker</h1>
           <p className="mx-auto mt-4 max-w-md text-lg leading-relaxed text-[var(--ink-mid)]">
             Upload each Confidence Profile assessment you receive and watch how
             your traits and archetype shift from one report to the next.

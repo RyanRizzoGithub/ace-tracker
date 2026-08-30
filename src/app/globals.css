@@ -60,16 +60,16 @@ body {
 @layer base {
   h1,
   h2 {
-    font-family: var(--font-dm-serif), Georgia, serif;
-    font-weight: 400;
     letter-spacing: -0.01em;
   }
 }
 
 @layer components {
+  /* Reserved for large display headings (e.g. the landing hero) only. */
   .serif {
     font-family: var(--font-dm-serif), Georgia, serif;
     font-weight: 400;
+    letter-spacing: -0.01em;
   }
 
   /* Tiny uppercase eyebrow label */
