@@ -1,5 +1,7 @@
 import { ARCHETYPES, CONFIDENCE_TYPE_LABELS } from "@/lib/taxonomy";
 import { ARCHETYPE_COLORS, CONFIDENCE_COLORS } from "@/lib/colors";
+import { profileDetails } from "@/lib/profile-content";
+import ProfileSections from "@/components/ProfileSections";
 
 /**
  * Reference guide for the six Confidence Profiles. This is static, authoritative
@@ -20,7 +22,9 @@ export default function ProfilesPage() {
         </p>
       </div>
 
-      {ARCHETYPES.map((a) => (
+      {ARCHETYPES.map((a) => {
+        const details = profileDetails(a.key);
+        return (
         <div key={a.key} className="card p-6">
           <div className="flex items-center gap-2.5">
             <span
@@ -56,8 +60,24 @@ export default function ProfilesPage() {
               </div>
             ))}
           </div>
+
+          {details && (
+            <details className="group mt-5 border-t border-[var(--border)] pt-4">
+              <summary className="flex cursor-pointer list-none items-center gap-1.5 text-sm font-semibold text-[var(--teal-dark)] [&::-webkit-details-marker]:hidden">
+                <span className="transition-transform group-open:rotate-90">
+                  ›
+                </span>
+                <span className="group-open:hidden">Read the full profile</span>
+                <span className="hidden group-open:inline">Hide full profile</span>
+              </summary>
+              <div className="mt-4">
+                <ProfileSections details={details} />
+              </div>
+            </details>
+          )}
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

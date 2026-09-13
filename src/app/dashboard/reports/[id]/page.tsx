@@ -9,6 +9,8 @@ import {
   findArchetype,
 } from "@/lib/taxonomy";
 import { ARCHETYPE_COLORS, CONFIDENCE_COLORS } from "@/lib/colors";
+import { profileDetails } from "@/lib/profile-content";
+import ProfileSections from "@/components/ProfileSections";
 import type { ScoreRow } from "@/lib/types";
 
 export default async function ReportDetailPage({
@@ -26,6 +28,9 @@ export default async function ReportDetailPage({
 
   const headlineArch = report.headline_archetype
     ? findArchetype(report.headline_archetype)
+    : undefined;
+  const headlineDetails = headlineArch
+    ? profileDetails(headlineArch.key)
     : undefined;
 
   async function deleteReport() {
@@ -73,21 +78,29 @@ export default async function ReportDetailPage({
 
       {headlineArch && (
         <div className="card p-6">
-          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
-            About the {headlineArch.name} profile
-          </h2>
-          <p className="text-sm font-medium text-[var(--ink-mid)]">
-            {headlineArch.topValue}
-          </p>
-          <p className="mt-2 leading-relaxed text-[var(--ink-mid)]">
-            {headlineArch.blurb}
-          </p>
-          <Link
-            href="/dashboard/profiles"
-            className="mt-3 inline-block text-sm font-semibold text-[var(--teal-dark)]"
-          >
-            See all six profiles →
-          </Link>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
+              About the {headlineArch.name} profile
+            </h2>
+            <Link
+              href="/dashboard/profiles"
+              className="text-sm font-semibold text-[var(--teal-dark)]"
+            >
+              See all six profiles →
+            </Link>
+          </div>
+          {headlineDetails ? (
+            <ProfileSections details={headlineDetails} />
+          ) : (
+            <>
+              <p className="text-sm font-medium text-[var(--ink-mid)]">
+                {headlineArch.topValue}
+              </p>
+              <p className="mt-2 leading-relaxed text-[var(--ink-mid)]">
+                {headlineArch.blurb}
+              </p>
+            </>
+          )}
         </div>
       )}
 
