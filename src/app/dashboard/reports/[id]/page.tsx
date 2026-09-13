@@ -7,7 +7,6 @@ import {
   ARCHETYPES,
   CONFIDENCE_TYPE_LABELS,
   findArchetype,
-  traitDescription,
 } from "@/lib/taxonomy";
 import { ARCHETYPE_COLORS, CONFIDENCE_COLORS } from "@/lib/colors";
 import type { ScoreRow } from "@/lib/types";
@@ -124,19 +123,12 @@ export default async function ReportDetailPage({
                 <div className="space-y-1">
                   {side.traits.map((trait) => {
                     const s = scoreFor(trait);
-                    const def = traitDescription(trait);
                     return (
                       <div
                         key={trait}
                         className="flex items-center justify-between text-sm"
                       >
-                        <span
-                          className="text-[var(--muted)]"
-                          title={def}
-                          style={def ? { cursor: "help" } : undefined}
-                        >
-                          {trait}
-                        </span>
+                        <span className="text-[var(--muted)]">{trait}</span>
                         <span className="font-mono font-semibold">
                           {s?.score ?? "—"}
                         </span>

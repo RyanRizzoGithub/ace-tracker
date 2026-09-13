@@ -1,8 +1,4 @@
-import {
-  ARCHETYPES,
-  CONFIDENCE_TYPE_LABELS,
-  traitDescription,
-} from "@/lib/taxonomy";
+import { ARCHETYPES, CONFIDENCE_TYPE_LABELS } from "@/lib/taxonomy";
 import { ARCHETYPE_COLORS, CONFIDENCE_COLORS } from "@/lib/colors";
 
 /**
@@ -51,20 +47,11 @@ export default function ProfilesPage() {
                   {CONFIDENCE_TYPE_LABELS[side.type]}
                 </div>
                 <ul className="space-y-2.5">
-                  {side.traits.map((trait) => {
-                    const def = traitDescription(trait);
-                    return (
-                      <li key={trait}>
-                        <span className="font-semibold">{trait}</span>
-                        {def && (
-                          <span className="text-sm text-[var(--muted)]">
-                            {" — "}
-                            {def}
-                          </span>
-                        )}
-                      </li>
-                    );
-                  })}
+                  {side.traits.map((trait) => (
+                    <li key={trait} className="font-semibold">
+                      {trait}
+                    </li>
+                  ))}
                 </ul>
               </div>
             ))}
