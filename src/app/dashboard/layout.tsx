@@ -43,6 +43,12 @@ export default async function DashboardLayout({
                 Reports
               </Link>
               <Link
+                href="/dashboard/profiles"
+                className="rounded-md px-3 py-1.5 text-[var(--ink-mid)] hover:bg-[var(--teal-light)] hover:text-[var(--teal-dark)]"
+              >
+                Profiles
+              </Link>
+              <Link
                 href="/dashboard/upload"
                 className="rounded-md px-3 py-1.5 text-[var(--ink-mid)] hover:bg-[var(--teal-light)] hover:text-[var(--teal-dark)]"
               >

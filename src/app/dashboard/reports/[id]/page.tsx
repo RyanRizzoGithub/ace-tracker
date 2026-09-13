@@ -3,7 +3,12 @@ import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getReportWithScores } from "@/lib/data";
-import { ARCHETYPES, CONFIDENCE_TYPE_LABELS } from "@/lib/taxonomy";
+import {
+  ARCHETYPES,
+  CONFIDENCE_TYPE_LABELS,
+  findArchetype,
+  traitDescription,
+} from "@/lib/taxonomy";
 import { ARCHETYPE_COLORS, CONFIDENCE_COLORS } from "@/lib/colors";
 import type { ScoreRow } from "@/lib/types";
 
@@ -19,6 +24,10 @@ export default async function ReportDetailPage({
 
   const scoreFor = (trait: string): ScoreRow | undefined =>
     report.scores.find((s) => s.trait === trait);
+
+  const headlineArch = report.headline_archetype
+    ? findArchetype(report.headline_archetype)
+    : undefined;
 
   async function deleteReport() {
     "use server";
@@ -63,6 +72,26 @@ export default async function ReportDetailPage({
         </form>
       </div>
 
+      {headlineArch && (
+        <div className="card p-6">
+          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
+            About the {headlineArch.name} profile
+          </h2>
+          <p className="text-sm font-medium text-[var(--ink-mid)]">
+            {headlineArch.topValue}
+          </p>
+          <p className="mt-2 leading-relaxed text-[var(--ink-mid)]">
+            {headlineArch.blurb}
+          </p>
+          <Link
+            href="/dashboard/profiles"
+            className="mt-3 inline-block text-sm font-semibold text-[var(--teal-dark)]"
+          >
+            See all six profiles →
+          </Link>
+        </div>
+      )}
+
       {report.narrative && (
         <div className="card p-6">
           <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
@@ -95,12 +124,19 @@ export default async function ReportDetailPage({
                 <div className="space-y-1">
                   {side.traits.map((trait) => {
                     const s = scoreFor(trait);
+                    const def = traitDescription(trait);
                     return (
                       <div
                         key={trait}
                         className="flex items-center justify-between text-sm"
                       >
-                        <span className="text-[var(--muted)]">{trait}</span>
+                        <span
+                          className="text-[var(--muted)]"
+                          title={def}
+                          style={def ? { cursor: "help" } : undefined}
+                        >
+                          {trait}
+                        </span>
                         <span className="font-mono font-semibold">
                           {s?.score ?? "—"}
                         </span>
