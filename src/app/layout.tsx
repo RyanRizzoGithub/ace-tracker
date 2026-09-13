@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { DM_Sans, DM_Serif_Display } from "next/font/google";
 import "./globals.css";
 
@@ -28,6 +29,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         {children}
+        {/* Thoughtly agent widget — loaded on every page. */}
+        <Script src="https://thoughtly-agent.onrender.com/widget.js" />
       </body>
     </html>
   );
