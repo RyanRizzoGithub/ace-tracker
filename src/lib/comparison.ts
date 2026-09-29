@@ -1,6 +1,11 @@
 import { ALL_TRAITS, ARCHETYPES } from "./taxonomy";
 import type { ConfidenceType, TraitDef } from "./taxonomy";
-import type { ReportWithScores } from "./types";
+import type { DevelopmentPlan, ReportWithScores } from "./types";
+import {
+  FEEDBACK_QUADRANTS,
+  feedbackValue,
+  type FeedbackValue,
+} from "./feedback";
 
 /**
  * Year-over-year comparison of two reports. Everything here is deterministic
@@ -76,6 +81,20 @@ export interface Standout {
   after: TraitChange | null;
 }
 
+/** What happened to the traits named in the earlier report's development plan. */
+export interface PlanFollowUp {
+  plan: DevelopmentPlan;
+  great: TraitChange | null;
+  growth: TraitChange | null;
+}
+
+export interface FeedbackChange {
+  label: string;
+  before: FeedbackValue | null;
+  after: FeedbackValue | null;
+  changed: boolean;
+}
+
 export interface Comparison {
   changes: TraitChange[];
   headline: Headline;
@@ -88,6 +107,8 @@ export interface Comparison {
   /** Highest-scoring OC/UC trait in each report. */
   topGrowthTrait: Standout;
   labelChanged: boolean;
+  planFollowUp: PlanFollowUp | null;
+  feedback: FeedbackChange[];
 }
 
 const round = (n: number, places: number) => {
@@ -253,6 +274,31 @@ export function compareReports(
     };
   });
 
+  const findChange = (trait: string | null) =>
+    trait
+      ? (changes.find(
+          (c) => c.trait.toLowerCase() === trait.trim().toLowerCase(),
+        ) ?? null)
+      : null;
+  const planFollowUp: PlanFollowUp | null = before.plan
+    ? {
+        plan: before.plan,
+        great: findChange(before.plan.great_trait),
+        growth: findChange(before.plan.growth_trait),
+      }
+    : null;
+
+  const feedback: FeedbackChange[] = FEEDBACK_QUADRANTS.map((q) => {
+    const bv = feedbackValue(before, q.column);
+    const av = feedbackValue(after, q.column);
+    return {
+      label: q.label,
+      before: bv,
+      after: av,
+      changed: bv !== null && av !== null && bv !== av,
+    };
+  });
+
   const isAC = (c: TraitChange) => c.confidenceType === "AC";
   const isShadow = (c: TraitChange) => c.confidenceType !== "AC";
 
@@ -276,5 +322,7 @@ export function compareReports(
       !!after.headline_archetype &&
       before.headline_archetype.trim().toLowerCase() !==
         after.headline_archetype.trim().toLowerCase(),
+    planFollowUp,
+    feedback,
   };
 }

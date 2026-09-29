@@ -2,6 +2,7 @@ import { ARCHETYPES, CONFIDENCE_TYPE_LABELS } from "@/lib/taxonomy";
 import { ARCHETYPE_COLORS, CONFIDENCE_COLORS } from "@/lib/colors";
 import { profileDetails } from "@/lib/profile-content";
 import ProfileSections from "@/components/ProfileSections";
+import TraitInfo from "@/components/TraitInfo";
 
 /**
  * Reference guide for the six Confidence Profiles. This is static, authoritative
@@ -18,7 +19,7 @@ export default function ProfilesPage() {
           The six Confidence Profiles, in spectrum order. Each has an authentic
           confidence side and a shadow side — either over- or under-confidence.
           There is no &ldquo;correct&rdquo; profile; each is a starting point for
-          development.
+          development. Select any trait to see what it means.
         </p>
       </div>
 
@@ -53,7 +54,7 @@ export default function ProfilesPage() {
                 <ul className="space-y-2.5">
                   {side.traits.map((trait) => (
                     <li key={trait} className="font-semibold">
-                      {trait}
+                      <TraitInfo trait={trait} confidenceType={side.type} />
                     </li>
                   ))}
                 </ul>

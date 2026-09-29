@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getReportsWithScores } from "@/lib/data";
+import { getCurrentUser, getReportsWithScores } from "@/lib/data";
 import TrendExplorer from "@/components/TrendExplorer";
 import ArchetypeShiftChart from "@/components/ArchetypeShiftChart";
 import { ARCHETYPE_COLORS } from "@/lib/colors";
@@ -8,7 +8,8 @@ import { findArchetype } from "@/lib/taxonomy";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const reports = await getReportsWithScores(supabase);
+  const user = await getCurrentUser(supabase);
+  const reports = await getReportsWithScores(supabase, user.id);
   const latest = reports[0];
 
   if (reports.length === 0) {

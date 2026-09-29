@@ -64,6 +64,18 @@ body {
   }
 }
 
+/* Printing the comparison (or saving it as a PDF): plain white pages, no
+   shadows, and keep each card on one page where possible. */
+@media print {
+  body {
+    background: #fff;
+  }
+  .card {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+}
+
 @layer components {
   /* Reserved for large display headings (e.g. the landing hero) only. */
   .serif {

@@ -2,11 +2,21 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 
+const feedbackValue = z.enum(["easy", "hard"]).nullable().optional();
+
 const saveSchema = z.object({
   reportDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   headlineArchetype: z.string().nullable(),
   narrative: z.string().nullable(),
   pdfPath: z.string().nullable(),
+  feedback: z
+    .object({
+      feedback_giving_compliments: feedbackValue,
+      feedback_giving_criticism: feedbackValue,
+      feedback_receiving_compliments: feedbackValue,
+      feedback_receiving_criticism: feedbackValue,
+    })
+    .optional(),
   scores: z
     .array(
       z.object({
@@ -48,6 +58,7 @@ export async function POST(request: Request) {
       narrative: data.narrative,
       pdf_path: data.pdfPath,
       status: "complete",
+      ...(data.feedback ?? {}),
     })
     .select("id")
     .single();

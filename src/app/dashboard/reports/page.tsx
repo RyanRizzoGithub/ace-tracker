@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getReportsWithScores } from "@/lib/data";
+import { getCurrentUser, getReportsWithScores } from "@/lib/data";
 import { ARCHETYPE_COLORS } from "@/lib/colors";
 import { findArchetype } from "@/lib/taxonomy";
 
 export default async function ReportsPage() {
   const supabase = await createClient();
-  const reports = await getReportsWithScores(supabase);
+  const user = await getCurrentUser(supabase);
+  const reports = await getReportsWithScores(supabase, user.id);
 
   return (
     <div className="space-y-6">

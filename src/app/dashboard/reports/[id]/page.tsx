@@ -2,7 +2,11 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getReportWithScores } from "@/lib/data";
+import {
+  getActiveCoachLink,
+  getCurrentUser,
+  getReportWithScores,
+} from "@/lib/data";
 import {
   ARCHETYPES,
   CONFIDENCE_TYPE_LABELS,
@@ -10,7 +14,11 @@ import {
 } from "@/lib/taxonomy";
 import { ARCHETYPE_COLORS, CONFIDENCE_COLORS } from "@/lib/colors";
 import { profileDetails } from "@/lib/profile-content";
+import { FEEDBACK_QUADRANTS, feedbackValue } from "@/lib/feedback";
 import ProfileSections from "@/components/ProfileSections";
+import TraitInfo from "@/components/TraitInfo";
+import DevelopmentPlanForm from "@/components/DevelopmentPlanForm";
+import { saveFeedback } from "@/app/dashboard/actions";
 import type { ScoreRow } from "@/lib/types";
 
 export default async function ReportDetailPage({
@@ -20,8 +28,18 @@ export default async function ReportDetailPage({
 }) {
   const { id } = await params;
   const supabase = await createClient();
-  const report = await getReportWithScores(supabase, id);
+  const [user, report] = await Promise.all([
+    getCurrentUser(supabase),
+    getReportWithScores(supabase, id),
+  ]);
   if (!report) notFound();
+
+  const isOwner = report.user_id === user.id;
+  const coachLink = isOwner
+    ? null
+    : await getActiveCoachLink(supabase, user.id, report.user_id);
+  const clientLabel =
+    coachLink?.client_name || coachLink?.client_email || "your client";
 
   const scoreFor = (trait: string): ScoreRow | undefined =>
     report.scores.find((s) => s.trait === trait);
@@ -44,16 +62,24 @@ export default async function ReportDetailPage({
     redirect("/dashboard/reports");
   }
 
+  const backHref = isOwner
+    ? "/dashboard/reports"
+    : `/dashboard/clients/${report.user_id}`;
+
   return (
     <div className="space-y-6">
       <div>
-        <Link
-          href="/dashboard/reports"
-          className="text-sm font-semibold text-[var(--muted)]"
-        >
-          ← All reports
+        <Link href={backHref} className="text-sm font-semibold text-[var(--muted)]">
+          ← {isOwner ? "All reports" : `${clientLabel}'s reports`}
         </Link>
       </div>
+
+      {!isOwner && (
+        <div className="card border-l-4 p-4 text-sm" style={{ borderLeftColor: "var(--uc)" }}>
+          You&apos;re viewing <strong>{clientLabel}</strong>&apos;s report as their
+          coach. It&apos;s read-only.
+        </div>
+      )}
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -69,11 +95,13 @@ export default async function ReportDetailPage({
             )}
           </p>
         </div>
-        <form action={deleteReport}>
-          <button type="submit" className="btn btn-ghost">
-            Delete
-          </button>
-        </form>
+        {isOwner && (
+          <form action={deleteReport}>
+            <button type="submit" className="btn btn-ghost">
+              Delete
+            </button>
+          </form>
+        )}
       </div>
 
       {headlineArch && (
@@ -115,44 +143,99 @@ export default async function ReportDetailPage({
         </div>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        {ARCHETYPES.map((a) => (
-          <div key={a.key} className="card p-5">
-            <div className="mb-3 flex items-center gap-2">
-              <span
-                className="h-3 w-3 rounded-full"
-                style={{ background: ARCHETYPE_COLORS[a.key] }}
-              />
-              <h3 className="font-semibold">{a.name}</h3>
-            </div>
-            {[a.authentic, a.shadow].map((side) => (
-              <div key={side.type} className="mb-3 last:mb-0">
-                <div
-                  className="mb-1 text-xs font-semibold"
-                  style={{ color: CONFIDENCE_COLORS[side.type] }}
-                >
-                  {CONFIDENCE_TYPE_LABELS[side.type]}
-                </div>
-                <div className="space-y-1">
-                  {side.traits.map((trait) => {
-                    const s = scoreFor(trait);
-                    return (
-                      <div
-                        key={trait}
-                        className="flex items-center justify-between text-sm"
-                      >
-                        <span className="text-[var(--muted)]">{trait}</span>
-                        <span className="font-mono font-semibold">
-                          {s?.score ?? "—"}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
+      <DevelopmentPlanForm reportId={report.id} plan={report.plan} editable={isOwner} />
+
+      <div>
+        <h2 className="mb-1 text-lg font-semibold">Trait scores</h2>
+        <p className="mb-3 text-sm text-[var(--muted)]">
+          Select a trait to see what it means.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {ARCHETYPES.map((a) => (
+            <div key={a.key} className="card p-5">
+              <div className="mb-3 flex items-center gap-2">
+                <span
+                  className="h-3 w-3 rounded-full"
+                  style={{ background: ARCHETYPE_COLORS[a.key] }}
+                />
+                <h3 className="font-semibold">{a.name}</h3>
               </div>
-            ))}
+              {[a.authentic, a.shadow].map((side) => (
+                <div key={side.type} className="mb-3 last:mb-0">
+                  <div
+                    className="mb-1 text-xs font-semibold"
+                    style={{ color: CONFIDENCE_COLORS[side.type] }}
+                  >
+                    {CONFIDENCE_TYPE_LABELS[side.type]}
+                  </div>
+                  <div className="space-y-1">
+                    {side.traits.map((trait) => {
+                      const s = scoreFor(trait);
+                      return (
+                        <TraitInfo
+                          key={trait}
+                          trait={trait}
+                          confidenceType={side.type}
+                          className="text-sm text-[var(--ink-mid)]"
+                        >
+                          <span className="font-mono font-semibold text-[var(--ink)]">
+                            {s?.score ?? "—"}
+                          </span>
+                        </TraitInfo>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="card p-6">
+        <h2 className="text-lg font-semibold">Feedback quadrants</h2>
+        <p className="mb-4 text-sm text-[var(--muted)]">
+          Which kinds of feedback feel easy and which feel hard.
+        </p>
+        {isOwner ? (
+          <form action={saveFeedback.bind(null, report.id)}>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {FEEDBACK_QUADRANTS.map((q) => (
+                <label key={q.column} className="block">
+                  <span className="mb-1 block text-sm font-medium">{q.label}</span>
+                  <select
+                    name={q.column}
+                    className="input"
+                    defaultValue={feedbackValue(report, q.column) ?? ""}
+                  >
+                    <option value="">—</option>
+                    <option value="easy">Easy</option>
+                    <option value="hard">Hard</option>
+                  </select>
+                </label>
+              ))}
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button type="submit" className="btn btn-ghost">
+                Save feedback quadrants
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {FEEDBACK_QUADRANTS.map((q) => {
+              const v = feedbackValue(report, q.column);
+              return (
+                <div key={q.column} className="flex justify-between gap-2 text-sm">
+                  <span className="text-[var(--muted)]">{q.label}</span>
+                  <span className="font-semibold">
+                    {v ? (v === "easy" ? "Easy" : "Hard") : "—"}
+                  </span>
+                </div>
+              );
+            })}
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

@@ -24,6 +24,27 @@ trait and archetype over time.
 4. `POST /api/reports` writes one `reports` row and 36 `report_scores` rows.
 5. The dashboard charts trait trends and archetype shifts across all reports.
 
+### Year-over-year reviews
+
+- **Compare** (`/dashboard/compare`) puts any two reports side by side:
+  AC/OC/UC averages and the Confidence Balance Ratio, biggest movers, a
+  paired-trait check per profile, feedback quadrants, and all 36 traits. It
+  opens with "Where you started" when the earlier report has a development plan.
+  Logic lives in [`src/lib/comparison.ts`](src/lib/comparison.ts).
+- **Development plans** are recorded per report, typed in or imported from the
+  last page of the Confidence Traits report PDF (`POST /api/extract-plan`).
+- **Trait definitions** for all 36 traits are in
+  [`src/lib/trait-content.ts`](src/lib/trait-content.ts). They are original
+  summaries, not the report's copyrighted wording.
+- **Coach sharing:** a client invites a coach by email (`/dashboard/sharing`).
+  Once the coach signs in with that email and accepts (`/dashboard/clients`),
+  they get read-only access to the client's reports, and on each comparison can
+  write review notes (optionally drafted by Claude via `POST /api/review-draft`)
+  and share them with the client. Access is enforced by RLS policies in
+  `supabase/migrations/0004_coach_sharing.sql`.
+- **Exports:** the compare page prints cleanly (or saves as PDF) and has a
+  review-call slide view with speaker notes for the coach.
+
 The fixed taxonomy (6 archetypes × authentic/shadow sides × 3 traits) lives in
 [`src/lib/taxonomy.ts`](src/lib/taxonomy.ts) and is the source of truth for both
 extraction and display.

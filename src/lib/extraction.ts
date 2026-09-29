@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { ARCHETYPE_NAMES, ALL_TRAITS, TRAIT_LOOKUP } from "./taxonomy";
 import type { ConfidenceType } from "./taxonomy";
+import { FEEDBACK_QUADRANTS, parseFeedbackValue, type FeedbackColumn, type FeedbackValue } from "./feedback";
 
 /**
  * Shape of the structured data we ask Claude to return after reading a
@@ -15,6 +16,11 @@ export const extractedScoreSchema = z.object({
   score: z.number().nullable(),
 });
 
+const feedbackValueSchema = z
+  .string()
+  .nullable()
+  .transform((v) => parseFeedbackValue(v?.trim().toLowerCase()));
+
 export const extractedReportSchema = z.object({
   /** ISO date parsed from the "prepared for" header, e.g. "2025-11-09". */
   reportDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
@@ -22,6 +28,16 @@ export const extractedReportSchema = z.object({
   headlineArchetype: z.string().nullable(),
   narrative: z.string().nullable(),
   scores: z.array(extractedScoreSchema),
+  feedbackQuadrants: z
+    .object({
+      givingCompliments: feedbackValueSchema,
+      givingCriticism: feedbackValueSchema,
+      receivingCompliments: feedbackValueSchema,
+      receivingCriticism: feedbackValueSchema,
+    })
+    .partial()
+    .nullable()
+    .optional(),
 });
 
 export type ExtractedScore = z.infer<typeof extractedScoreSchema>;
@@ -39,7 +55,13 @@ Return ONLY a JSON object with this exact shape:
   "scores": [
     { "trait": "Accomplished", "confidenceType": "AC", "score": 3.5 },
     ...
-  ]
+  ],
+  "feedbackQuadrants": {                 // the "FEEDBACK QUADRANTS" table
+    "givingCompliments": "easy" | "hard" | null,
+    "givingCriticism": "easy" | "hard" | null,
+    "receivingCompliments": "easy" | "hard" | null,
+    "receivingCriticism": "easy" | "hard" | null
+  }
 }
 
 Rules:
@@ -48,6 +70,9 @@ Rules:
 - Include every trait shown in the traits grid, using the exact trait label text.
 - Read each trait's numeric score from the bars/values in the document. If a
   value is genuinely unreadable, use null for that trait's score — do not guess.
+- In the Feedback Quadrants table, each of the four boxes has an EASY and a
+  HARD cell; exactly one is filled with color. Report the colored one. Use null
+  if the table is missing or no cell is colored.
 - Do not include any text outside the JSON object.`;
 
 /** A canonical, fully-populated score ready to persist to report_scores. */
@@ -79,6 +104,16 @@ export function toCanonicalScores(extracted: ExtractedReport): CanonicalScore[] 
       ? (byTrait.get(t.trait.toLowerCase()) ?? null)
       : null,
   }));
+}
+
+/** Maps extracted feedback quadrants onto the report's column names. */
+export function toFeedbackColumns(
+  extracted: ExtractedReport,
+): Record<FeedbackColumn, FeedbackValue | null> {
+  const q = extracted.feedbackQuadrants ?? {};
+  return Object.fromEntries(
+    FEEDBACK_QUADRANTS.map((f) => [f.column, q[f.key] ?? null]),
+  ) as Record<FeedbackColumn, FeedbackValue | null>;
 }
 
 /** Pulls the first top-level JSON object out of a model response. */

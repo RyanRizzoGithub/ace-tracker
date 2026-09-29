@@ -8,7 +8,98 @@ import {
 } from "@/lib/comparison";
 import { CONFIDENCE_TYPE_LABELS, type ConfidenceType } from "@/lib/taxonomy";
 import { ARCHETYPE_COLORS, CONFIDENCE_COLORS } from "@/lib/colors";
-import type { ReportWithScores } from "@/lib/types";
+import type { ReportWithScores, ReviewNote } from "@/lib/types";
+import TraitInfo from "@/components/TraitInfo";
+
+function PlanTrait({
+  label,
+  trait,
+  words,
+  change,
+}: {
+  label: string;
+  trait: string | null;
+  words: string | null;
+  change: TraitChange | null;
+}) {
+  if (!trait) return null;
+  const style = change?.direction ? DIRECTION_STYLES[change.direction] : null;
+  return (
+    <div className="rounded-[var(--radius-sm)] border border-[var(--sand-mid)] p-4">
+      <div className="eyebrow mb-1">{label}</div>
+      {change ? (
+        <TraitInfo trait={trait} confidenceType={change.confidenceType} className="font-semibold">
+          <DeltaChip delta={change.delta} direction={change.direction} />
+        </TraitInfo>
+      ) : (
+        <div className="font-semibold">{trait}</div>
+      )}
+      {words && (
+        <p className="mt-2 text-sm italic leading-relaxed text-[var(--ink-mid)]">
+          &ldquo;{words}&rdquo;
+        </p>
+      )}
+      {change && (
+        <p className="mt-2 text-sm text-[var(--ink-mid)]">
+          <span className="font-mono">
+            {fmt(change.before)} → {fmt(change.after)}
+          </span>
+          {style && (
+            <span className="ml-2" style={{ color: style.color }}>
+              {change.direction === "steady"
+                ? change.confidenceType === "AC"
+                  ? "held steady: a strength that's staying built"
+                  : "held steady"
+                : change.direction === "better"
+                  ? "moved in the direction you set out to go"
+                  : "moved the other way; worth a conversation"}
+            </span>
+          )}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function CoachReview({ note }: { note: ReviewNote }) {
+  const paragraphs = (s: string | null) =>
+    (s ?? "").split(/\n\s*\n/).filter((p) => p.trim());
+  return (
+    <section className="card p-6" style={{ borderTop: "3px solid var(--teal-dark)" }}>
+      <div className="eyebrow mb-1">From your coach</div>
+      <h2 className="mb-3 text-lg font-semibold">Your review</h2>
+      <div className="space-y-3 leading-relaxed text-[var(--ink-mid)]">
+        {paragraphs(note.summary).map((p, i) => (
+          <p key={i} className="whitespace-pre-line">{p}</p>
+        ))}
+      </div>
+      {note.focus_trait && (
+        <div className="mt-5 rounded-[var(--radius-sm)] bg-[var(--sand)] p-4">
+          <div className="eyebrow mb-1">The one worth sitting with</div>
+          <div className="mb-2 font-semibold">{note.focus_trait}</div>
+          <div className="space-y-2 text-sm leading-relaxed text-[var(--ink-mid)]">
+            {paragraphs(note.focus_note).map((p, i) => (
+              <p key={i} className="whitespace-pre-line">{p}</p>
+            ))}
+          </div>
+        </div>
+      )}
+      {note.questions.length > 0 && (
+        <div className="mt-5">
+          <div className="eyebrow mb-2">Questions worth sitting with</div>
+          <ol className="space-y-2">
+            {note.questions.map((q, i) => (
+              <li key={i} className="flex gap-3 text-sm leading-relaxed">
+                <span className="font-semibold text-[var(--teal-dark)]">{i + 1}</span>
+                <span>{q}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+    </section>
+  );
+}
 
 const DIRECTION_STYLES: Record<Direction, { color: string; bg: string; label: string }> = {
   better: { color: "var(--teal-dark)", bg: "var(--teal-light)", label: "better" },
@@ -157,9 +248,15 @@ function breadthSentence(
 export default function ComparisonView({
   before,
   after,
+  sharedNote,
+  noteOnlyInPrint = false,
 }: {
   before: ReportWithScores;
   after: ReportWithScores;
+  /** A coach's review to show read-only (to the client, or when printing). */
+  sharedNote?: ReviewNote | null;
+  /** Show the review only on paper (the coach edits it on screen instead). */
+  noteOnlyInPrint?: boolean;
 }) {
   const c = compareReports(before, after);
   const { headline } = c;
@@ -195,6 +292,43 @@ export default function ComparisonView({
           can be what a strength looks like once it&apos;s built.
         </p>
       </div>
+
+      {c.planFollowUp && (
+        <section className="card p-6">
+          <h2 className="text-lg font-semibold">Where you started</h2>
+          <p className="mb-4 text-sm text-[var(--muted)]">
+            The development plan written after the{" "}
+            {formatDate(before.report_date, "medium")} report, in your own
+            words, and what happened to those two traits.
+          </p>
+          <div className="grid gap-4 md:grid-cols-2">
+            <PlanTrait
+              label="Great trait to leverage"
+              trait={c.planFollowUp.plan.great_trait}
+              words={c.planFollowUp.plan.great_trait_words}
+              change={c.planFollowUp.great}
+            />
+            <PlanTrait
+              label="Growth trait to resolve"
+              trait={c.planFollowUp.plan.growth_trait}
+              words={c.planFollowUp.plan.growth_trait_words}
+              change={c.planFollowUp.growth}
+            />
+          </div>
+          {c.planFollowUp.plan.life_change && (
+            <p className="mt-4 text-sm leading-relaxed text-[var(--ink-mid)]">
+              <span className="font-semibold">How you hoped life would change: </span>
+              <span className="italic">&ldquo;{c.planFollowUp.plan.life_change}&rdquo;</span>
+            </p>
+          )}
+        </section>
+      )}
+
+      {sharedNote && (
+        <div className={noteOnlyInPrint ? "hidden print:block" : undefined}>
+          <CoachReview note={sharedNote} />
+        </div>
+      )}
 
       {/* Headline numbers */}
       <section className="card p-6">
@@ -418,6 +552,50 @@ export default function ComparisonView({
           })}
         </div>
       </section>
+
+      {c.feedback.some((f) => f.before || f.after) && (
+        <section className="card p-6">
+          <h2 className="text-lg font-semibold">Feedback quadrants</h2>
+          <p className="mb-4 text-sm text-[var(--muted)]">
+            Which kinds of feedback felt easy or hard in each report.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {c.feedback.map((f) => {
+              const label = (v: string | null) =>
+                v ? v[0].toUpperCase() + v.slice(1) : "—";
+              const tone: Direction | null = f.changed
+                ? f.after === "easy"
+                  ? "better"
+                  : "worse"
+                : null;
+              return (
+                <div
+                  key={f.label}
+                  className="flex items-center justify-between gap-3 rounded-[var(--radius-sm)] border border-[var(--sand-mid)] px-4 py-3 text-sm"
+                >
+                  <span className="text-[var(--ink-mid)]">{f.label}</span>
+                  <span className="flex items-center gap-2">
+                    <span className="font-medium">
+                      {label(f.before)} → {label(f.after)}
+                    </span>
+                    {tone && (
+                      <span
+                        className="badge"
+                        style={{
+                          color: DIRECTION_STYLES[tone].color,
+                          background: DIRECTION_STYLES[tone].bg,
+                        }}
+                      >
+                        changed
+                      </span>
+                    )}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* Full data */}
       <section className="card p-6">

@@ -6,6 +6,12 @@ import { createClient } from "@/lib/supabase/client";
 import { ARCHETYPES, ARCHETYPE_NAMES, CONFIDENCE_TYPE_LABELS } from "@/lib/taxonomy";
 import { CONFIDENCE_COLORS } from "@/lib/colors";
 import type { CanonicalScore } from "@/lib/extraction";
+import {
+  FEEDBACK_QUADRANTS,
+  parseFeedbackValue,
+  type FeedbackColumn,
+  type FeedbackValue,
+} from "@/lib/feedback";
 
 type Phase = "select" | "working" | "confirm" | "saving";
 
@@ -15,6 +21,7 @@ interface Draft {
   narrative: string;
   pdfPath: string;
   scores: CanonicalScore[];
+  feedback: Record<FeedbackColumn, FeedbackValue | null>;
 }
 
 export default function UploadFlow({ userId }: { userId: string }) {
@@ -56,6 +63,12 @@ export default function UploadFlow({ userId }: { userId: string }) {
         narrative: data.narrative ?? "",
         pdfPath: path,
         scores: data.scores as CanonicalScore[],
+        feedback: Object.fromEntries(
+          FEEDBACK_QUADRANTS.map((q) => [
+            q.column,
+            parseFeedbackValue(data.feedback?.[q.column]),
+          ]),
+        ) as Draft["feedback"],
       });
       setPhase("confirm");
     } catch (err) {
@@ -93,6 +106,7 @@ export default function UploadFlow({ userId }: { userId: string }) {
           narrative: draft.narrative || null,
           pdfPath: draft.pdfPath,
           scores: draft.scores,
+          feedback: draft.feedback,
         }),
       });
       const data = await res.json();
@@ -158,6 +172,38 @@ export default function UploadFlow({ userId }: { userId: string }) {
               }
             />
           </label>
+        </div>
+
+        <div className="card p-6">
+          <h2 className="text-lg font-semibold">Feedback quadrants</h2>
+          <p className="mb-4 text-sm text-[var(--muted)]">
+            From the report&apos;s Feedback Quadrants table: which of these feel
+            easy and which feel hard.
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {FEEDBACK_QUADRANTS.map((q) => (
+              <label key={q.column} className="block">
+                <span className="mb-1 block text-sm font-medium">{q.label}</span>
+                <select
+                  className="input"
+                  value={draft!.feedback[q.column] ?? ""}
+                  onChange={(e) =>
+                    setDraft({
+                      ...draft!,
+                      feedback: {
+                        ...draft!.feedback,
+                        [q.column]: parseFeedbackValue(e.target.value),
+                      },
+                    })
+                  }
+                >
+                  <option value="">—</option>
+                  <option value="easy">Easy</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </label>
+            ))}
+          </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">

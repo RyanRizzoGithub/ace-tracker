@@ -1,4 +1,5 @@
 import type { ConfidenceType } from "./taxonomy";
+import type { FeedbackValue } from "./feedback";
 
 /** A row of public.reports. */
 export interface ReportRow {
@@ -10,6 +11,10 @@ export interface ReportRow {
   pdf_path: string | null;
   status: string;
   created_at: string;
+  feedback_giving_compliments?: FeedbackValue | null;
+  feedback_giving_criticism?: FeedbackValue | null;
+  feedback_receiving_compliments?: FeedbackValue | null;
+  feedback_receiving_criticism?: FeedbackValue | null;
 }
 
 /** A row of public.report_scores. */
@@ -24,7 +29,67 @@ export interface ScoreRow {
   score: number | null;
 }
 
-/** A report joined with its scores, as used across the dashboard. */
+/** A row of public.development_plans. */
+export interface DevelopmentPlan {
+  id: string;
+  report_id: string;
+  user_id: string;
+  great_trait: string | null;
+  great_trait_words: string | null;
+  great_next_step: string | null;
+  growth_trait: string | null;
+  growth_trait_words: string | null;
+  growth_next_step: string | null;
+  communicating: string | null;
+  life_change: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** The editable fields of a development plan. */
+export type DevelopmentPlanFields = Pick<
+  DevelopmentPlan,
+  | "great_trait"
+  | "great_trait_words"
+  | "great_next_step"
+  | "growth_trait"
+  | "growth_trait_words"
+  | "growth_next_step"
+  | "communicating"
+  | "life_change"
+>;
+
+/** A report joined with its scores (and plan, when loaded). */
 export interface ReportWithScores extends ReportRow {
   scores: ScoreRow[];
+  plan?: DevelopmentPlan | null;
+}
+
+/** A row of public.coach_links. */
+export interface CoachLink {
+  id: string;
+  client_id: string;
+  client_name: string | null;
+  client_email: string | null;
+  coach_email: string;
+  coach_id: string | null;
+  status: "pending" | "active" | "revoked";
+  created_at: string;
+  accepted_at: string | null;
+}
+
+/** A row of public.review_notes. */
+export interface ReviewNote {
+  id: string;
+  client_id: string;
+  coach_id: string;
+  from_report_id: string;
+  to_report_id: string;
+  summary: string | null;
+  focus_trait: string | null;
+  focus_note: string | null;
+  questions: string[];
+  shared: boolean;
+  created_at: string;
+  updated_at: string;
 }

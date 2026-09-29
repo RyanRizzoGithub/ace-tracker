@@ -6,6 +6,7 @@ import {
   extractedReportSchema,
   parseExtractionJson,
   toCanonicalScores,
+  toFeedbackColumns,
 } from "@/lib/extraction";
 
 // PDF reading + a vision-capable model can run longer than the default.
@@ -109,5 +110,6 @@ export async function POST(request: Request) {
     headlineArchetype: parsed.headlineArchetype,
     narrative: parsed.narrative,
     scores: toCanonicalScores(parsed),
+    feedback: toFeedbackColumns(parsed),
   });
 }
