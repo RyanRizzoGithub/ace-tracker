@@ -77,19 +77,3 @@ export interface CoachLink {
   created_at: string;
   accepted_at: string | null;
 }
-
-/** A row of public.review_notes. */
-export interface ReviewNote {
-  id: string;
-  client_id: string;
-  coach_id: string;
-  from_report_id: string;
-  to_report_id: string;
-  summary: string | null;
-  focus_trait: string | null;
-  focus_note: string | null;
-  questions: string[];
-  shared: boolean;
-  created_at: string;
-  updated_at: string;
-}

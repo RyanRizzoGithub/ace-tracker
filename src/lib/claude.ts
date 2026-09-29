@@ -3,9 +3,9 @@ import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import type { z } from "zod";
 
 /**
- * Shared helper for the structured-output Claude calls added with the review
- * features (plan import, review-note drafts). The original ACE Report
- * extractor in /api/extract keeps its own model setting.
+ * Helper for structured-output Claude calls (currently the development plan
+ * import). The original ACE Report extractor in /api/extract keeps its own
+ * model setting.
  */
 export const REVIEW_MODEL = "claude-opus-5-5";
 

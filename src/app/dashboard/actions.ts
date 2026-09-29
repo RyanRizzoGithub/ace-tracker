@@ -1,6 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { VIEWING_COOKIE } from "@/lib/viewing";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { FEEDBACK_QUADRANTS, parseFeedbackValue } from "@/lib/feedback";
@@ -161,44 +164,37 @@ export async function leaveClient(linkId: string) {
 }
 
 // ---------------------------------------------------------------------------
-// Coach review notes
+// Coach "viewing a client's account"
 // ---------------------------------------------------------------------------
-const noteSchema = z.object({
-  clientId: z.string().uuid(),
-  fromReportId: z.string().uuid(),
-  toReportId: z.string().uuid(),
-  summary: z.string().nullable(),
-  focusTrait: z.string().nullable(),
-  focusNote: z.string().nullable(),
-  questions: z.array(z.string()),
-  shared: z.boolean(),
-});
-
-export type ReviewNoteInput = z.infer<typeof noteSchema>;
-
-export async function saveReviewNote(input: ReviewNoteInput): Promise<ActionResult> {
+/**
+ * Switches the dashboard to show a client's data. The cookie only chooses
+ * whose reports to load; row-level security still decides what can be read,
+ * and every page re-checks the coaching link (see src/lib/viewing.ts).
+ */
+export async function startViewingClient(clientId: string) {
   const { supabase, user } = await requireUser();
-  const parsed = noteSchema.safeParse(input);
-  if (!parsed.success) return { ok: false, error: "Invalid note data" };
-  const n = parsed.data;
+  const { data: link } = await supabase
+    .from("coach_links")
+    .select("id")
+    .eq("coach_id", user.id)
+    .eq("client_id", clientId)
+    .eq("status", "active")
+    .maybeSingle();
+  if (!link) redirect("/dashboard/clients");
 
-  const { error } = await supabase.from("review_notes").upsert(
-    {
-      client_id: n.clientId,
-      coach_id: user.id,
-      from_report_id: n.fromReportId,
-      to_report_id: n.toReportId,
-      summary: clean(n.summary),
-      focus_trait: clean(n.focusTrait),
-      focus_note: clean(n.focusNote),
-      questions: n.questions.map((q) => q.trim()).filter(Boolean),
-      shared: n.shared,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "coach_id,from_report_id,to_report_id" },
-  );
-  // RLS rejects the write unless this user actively coaches the client.
-  if (error) return { ok: false, error: error.message };
-  revalidatePath("/dashboard/compare");
-  return { ok: true };
+  (await cookies()).set(VIEWING_COOKIE, clientId, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 12,
+  });
+  revalidatePath("/dashboard", "layout");
+  redirect("/dashboard");
+}
+
+export async function stopViewingClient() {
+  (await cookies()).delete(VIEWING_COOKIE);
+  revalidatePath("/dashboard", "layout");
+  redirect("/dashboard/clients");
 }

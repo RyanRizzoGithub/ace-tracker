@@ -1,5 +1,6 @@
 import Link from "next/link";
 import BrandLogo from "@/components/BrandLogo";
+import { stopViewingClient } from "@/app/dashboard/actions";
 
 const NAV_LINKS = [
   { href: "/dashboard", label: "Overview" },
@@ -12,14 +13,20 @@ const NAV_LINKS = [
 export default function DashboardHeader({
   email,
   isCoach = false,
+  viewingLabel = null,
 }: {
   email?: string | null;
   /** Shows the Clients link for people who coach (or are invited to). */
   isCoach?: boolean;
+  /** Set while a coach is viewing a client's account. */
+  viewingLabel?: string | null;
 }) {
-  const links = isCoach
-    ? [...NAV_LINKS, { href: "/dashboard/clients", label: "Clients" }]
-    : NAV_LINKS;
+  const viewing = viewingLabel !== null;
+  // Viewing a client is read-only, so their Upload tab is left out.
+  const links = [
+    ...NAV_LINKS.filter((l) => !(viewing && l.href === "/dashboard/upload")),
+    ...(isCoach ? [{ href: "/dashboard/clients", label: "Clients" }] : []),
+  ];
 
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--sand-mid)] bg-[var(--sand)] print:hidden">
@@ -48,12 +55,14 @@ export default function DashboardHeader({
           ))}
         </nav>
         <div className="flex items-center gap-3">
-          <Link
-            href="/dashboard/sharing"
-            className="text-sm whitespace-nowrap text-[var(--ink-mid)] hover:text-[var(--teal-dark)]"
-          >
-            Sharing
-          </Link>
+          {!viewing && (
+            <Link
+              href="/dashboard/sharing"
+              className="text-sm whitespace-nowrap text-[var(--ink-mid)] hover:text-[var(--teal-dark)]"
+            >
+              Sharing
+            </Link>
+          )}
           <form action="/auth/signout" method="post">
             <button
               type="submit"
@@ -65,6 +74,23 @@ export default function DashboardHeader({
           </form>
         </div>
       </div>
+      {viewing && (
+        <div className="border-t border-[var(--uc)] bg-[var(--uc)] text-white">
+          <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-2 text-sm sm:px-6">
+            <span className="min-w-0">
+              Viewing <strong>{viewingLabel}</strong>&apos;s account · read-only
+            </span>
+            <form action={stopViewingClient}>
+              <button
+                type="submit"
+                className="rounded-md border border-white/50 px-3 py-1 text-sm font-medium whitespace-nowrap hover:bg-white/15"
+              >
+                Exit to my account
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

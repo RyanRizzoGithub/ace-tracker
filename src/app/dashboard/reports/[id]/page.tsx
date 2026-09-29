@@ -2,11 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import {
-  getActiveCoachLink,
-  getCurrentUser,
-  getReportWithScores,
-} from "@/lib/data";
+import { getCurrentUser, getReportWithScores } from "@/lib/data";
 import {
   ARCHETYPES,
   CONFIDENCE_TYPE_LABELS,
@@ -34,12 +30,8 @@ export default async function ReportDetailPage({
   ]);
   if (!report) notFound();
 
+  // Coaches can read a client's report (RLS), but only the owner can change it.
   const isOwner = report.user_id === user.id;
-  const coachLink = isOwner
-    ? null
-    : await getActiveCoachLink(supabase, user.id, report.user_id);
-  const clientLabel =
-    coachLink?.client_name || coachLink?.client_email || "your client";
 
   const scoreFor = (trait: string): ScoreRow | undefined =>
     report.scores.find((s) => s.trait === trait);
@@ -62,24 +54,16 @@ export default async function ReportDetailPage({
     redirect("/dashboard/reports");
   }
 
-  const backHref = isOwner
-    ? "/dashboard/reports"
-    : `/dashboard/clients/${report.user_id}`;
-
   return (
     <div className="space-y-6">
       <div>
-        <Link href={backHref} className="text-sm font-semibold text-[var(--muted)]">
-          ← {isOwner ? "All reports" : `${clientLabel}'s reports`}
+        <Link
+          href="/dashboard/reports"
+          className="text-sm font-semibold text-[var(--muted)]"
+        >
+          ← All reports
         </Link>
       </div>
-
-      {!isOwner && (
-        <div className="card border-l-4 p-4 text-sm" style={{ borderLeftColor: "var(--uc)" }}>
-          You&apos;re viewing <strong>{clientLabel}</strong>&apos;s report as their
-          coach. It&apos;s read-only.
-        </div>
-      )}
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentUser, getReportsWithScores } from "@/lib/data";
+import { getReportsWithScores } from "@/lib/data";
+import { getViewContext } from "@/lib/viewing";
 import TrendExplorer from "@/components/TrendExplorer";
 import ArchetypeShiftChart from "@/components/ArchetypeShiftChart";
 import { ARCHETYPE_COLORS } from "@/lib/colors";
@@ -8,9 +9,20 @@ import { findArchetype } from "@/lib/taxonomy";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const user = await getCurrentUser(supabase);
-  const reports = await getReportsWithScores(supabase, user.id);
+  const { subjectId, viewing, clientLabel } = await getViewContext();
+  const reports = await getReportsWithScores(supabase, subjectId);
   const latest = reports[0];
+
+  if (reports.length === 0 && viewing) {
+    return (
+      <div className="card mx-auto max-w-lg p-10 text-center">
+        <h1 className="text-2xl font-semibold">No reports yet</h1>
+        <p className="mx-auto mt-2 max-w-sm text-[var(--muted)]">
+          {clientLabel} hasn&apos;t uploaded any Confidence Profile reports yet.
+        </p>
+      </div>
+    );
+  }
 
   if (reports.length === 0) {
     return (
@@ -46,9 +58,11 @@ export default async function DashboardPage() {
               Compare reports
             </Link>
           )}
-          <Link href="/dashboard/upload" className="btn btn-primary">
-            Upload a report
-          </Link>
+          {!viewing && (
+            <Link href="/dashboard/upload" className="btn btn-primary">
+              Upload a report
+            </Link>
+          )}
         </div>
       </div>
 

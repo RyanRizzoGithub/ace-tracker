@@ -23,9 +23,10 @@ export default async function SharingPage() {
       <div>
         <h1 className="text-2xl font-semibold">Sharing with your coach</h1>
         <p className="mt-1 max-w-2xl text-sm text-[var(--muted)]">
-          A coach you invite can view your reports, comparisons and development
-          plans, and write review notes for you. They can&apos;t change or delete
-          anything of yours. You can remove their access at any time.
+          A coach you invite can view your Overview, Reports and Compare tabs,
+          including your development plans, for example while screen-sharing a
+          session. They can&apos;t change or delete anything of yours. You can
+          remove their access at any time.
         </p>
       </div>
 

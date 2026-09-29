@@ -4,7 +4,6 @@ import type {
   DevelopmentPlan,
   ReportRow,
   ReportWithScores,
-  ReviewNote,
   ScoreRow,
 } from "./types";
 
@@ -128,22 +127,4 @@ export async function getActiveCoachLink(
     .eq("status", "active")
     .maybeSingle();
   return (data as CoachLink | null) ?? null;
-}
-
-/** Review notes for one comparison: the coach's own, or those shared with the client. */
-export async function getReviewNotes(
-  supabase: SupabaseClient,
-  fromReportId: string,
-  toReportId: string,
-): Promise<ReviewNote[]> {
-  const { data } = await supabase
-    .from("review_notes")
-    .select("*")
-    .eq("from_report_id", fromReportId)
-    .eq("to_report_id", toReportId)
-    .order("updated_at", { ascending: false });
-  return ((data ?? []) as ReviewNote[]).map((n) => ({
-    ...n,
-    questions: Array.isArray(n.questions) ? n.questions : [],
-  }));
 }

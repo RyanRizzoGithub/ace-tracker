@@ -38,12 +38,12 @@ trait and archetype over time.
   summaries, not the report's copyrighted wording.
 - **Coach sharing:** a client invites a coach by email (`/dashboard/sharing`).
   Once the coach signs in with that email and accepts (`/dashboard/clients`),
-  they get read-only access to the client's reports, and on each comparison can
-  write review notes (optionally drafted by Claude via `POST /api/review-draft`)
-  and share them with the client. Access is enforced by RLS policies in
-  `supabase/migrations/0004_coach_sharing.sql`.
-- **Exports:** the compare page prints cleanly (or saves as PDF) and has a
-  review-call slide view with speaker notes for the coach.
+  they can **open the client's account**: every tab (Overview, Reports,
+  Compare, Profiles) then shows that client's data, read-only, under a banner
+  with an exit button. Handy for screen-sharing a session. Which client is open
+  is kept in a cookie ([`src/lib/viewing.ts`](src/lib/viewing.ts)); access is
+  enforced by RLS policies in `supabase/migrations/0004_coach_sharing.sql`.
+- **Printing:** the compare page prints cleanly (or saves as PDF).
 
 The fixed taxonomy (6 archetypes × authentic/shadow sides × 3 traits) lives in
 [`src/lib/taxonomy.ts`](src/lib/taxonomy.ts) and is the source of truth for both

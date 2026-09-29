@@ -1,11 +1,27 @@
-import { createClient } from "@/lib/supabase/server";
+import { getViewContext } from "@/lib/viewing";
+import { stopViewingClient } from "@/app/dashboard/actions";
 import UploadFlow from "@/components/UploadFlow";
 
 export default async function UploadPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user, viewing, clientLabel } = await getViewContext();
+
+  // A coach viewing a client's account can't add reports to it.
+  if (viewing) {
+    return (
+      <div className="card mx-auto max-w-lg p-10 text-center">
+        <h1 className="text-2xl font-semibold">Upload a report</h1>
+        <p className="mx-auto mt-2 max-w-sm text-[var(--muted)]">
+          You&apos;re viewing {clientLabel}&apos;s account. Only {clientLabel}{" "}
+          can add reports to it.
+        </p>
+        <form action={stopViewingClient} className="mt-6">
+          <button type="submit" className="btn btn-primary">
+            Back to my account
+          </button>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -16,7 +32,7 @@ export default async function UploadPage() {
           the values before saving.
         </p>
       </div>
-      <UploadFlow userId={user!.id} />
+      <UploadFlow userId={user.id} />
     </div>
   );
 }

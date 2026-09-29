@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentUser, getReportsWithScores } from "@/lib/data";
+import { getReportsWithScores } from "@/lib/data";
+import { getViewContext } from "@/lib/viewing";
 import { ARCHETYPE_COLORS } from "@/lib/colors";
 import { findArchetype } from "@/lib/taxonomy";
 
 export default async function ReportsPage() {
   const supabase = await createClient();
-  const user = await getCurrentUser(supabase);
-  const reports = await getReportsWithScores(supabase, user.id);
+  const { subjectId, viewing } = await getViewContext();
+  const reports = await getReportsWithScores(supabase, subjectId);
 
   return (
     <div className="space-y-6">
@@ -19,9 +20,11 @@ export default async function ReportsPage() {
               Compare
             </Link>
           )}
-          <Link href="/dashboard/upload" className="btn btn-primary">
-            Upload a report
-          </Link>
+          {!viewing && (
+            <Link href="/dashboard/upload" className="btn btn-primary">
+              Upload a report
+            </Link>
+          )}
         </div>
       </div>
 

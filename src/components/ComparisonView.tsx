@@ -8,7 +8,7 @@ import {
 } from "@/lib/comparison";
 import { CONFIDENCE_TYPE_LABELS, type ConfidenceType } from "@/lib/taxonomy";
 import { ARCHETYPE_COLORS, CONFIDENCE_COLORS } from "@/lib/colors";
-import type { ReportWithScores, ReviewNote } from "@/lib/types";
+import type { ReportWithScores } from "@/lib/types";
 import TraitInfo from "@/components/TraitInfo";
 
 function PlanTrait({
@@ -58,46 +58,6 @@ function PlanTrait({
         </p>
       )}
     </div>
-  );
-}
-
-function CoachReview({ note }: { note: ReviewNote }) {
-  const paragraphs = (s: string | null) =>
-    (s ?? "").split(/\n\s*\n/).filter((p) => p.trim());
-  return (
-    <section className="card p-6" style={{ borderTop: "3px solid var(--teal-dark)" }}>
-      <div className="eyebrow mb-1">From your coach</div>
-      <h2 className="mb-3 text-lg font-semibold">Your review</h2>
-      <div className="space-y-3 leading-relaxed text-[var(--ink-mid)]">
-        {paragraphs(note.summary).map((p, i) => (
-          <p key={i} className="whitespace-pre-line">{p}</p>
-        ))}
-      </div>
-      {note.focus_trait && (
-        <div className="mt-5 rounded-[var(--radius-sm)] bg-[var(--sand)] p-4">
-          <div className="eyebrow mb-1">The one worth sitting with</div>
-          <div className="mb-2 font-semibold">{note.focus_trait}</div>
-          <div className="space-y-2 text-sm leading-relaxed text-[var(--ink-mid)]">
-            {paragraphs(note.focus_note).map((p, i) => (
-              <p key={i} className="whitespace-pre-line">{p}</p>
-            ))}
-          </div>
-        </div>
-      )}
-      {note.questions.length > 0 && (
-        <div className="mt-5">
-          <div className="eyebrow mb-2">Questions worth sitting with</div>
-          <ol className="space-y-2">
-            {note.questions.map((q, i) => (
-              <li key={i} className="flex gap-3 text-sm leading-relaxed">
-                <span className="font-semibold text-[var(--teal-dark)]">{i + 1}</span>
-                <span>{q}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
-      )}
-    </section>
   );
 }
 
@@ -248,15 +208,9 @@ function breadthSentence(
 export default function ComparisonView({
   before,
   after,
-  sharedNote,
-  noteOnlyInPrint = false,
 }: {
   before: ReportWithScores;
   after: ReportWithScores;
-  /** A coach's review to show read-only (to the client, or when printing). */
-  sharedNote?: ReviewNote | null;
-  /** Show the review only on paper (the coach edits it on screen instead). */
-  noteOnlyInPrint?: boolean;
 }) {
   const c = compareReports(before, after);
   const { headline } = c;
@@ -322,12 +276,6 @@ export default function ComparisonView({
             </p>
           )}
         </section>
-      )}
-
-      {sharedNote && (
-        <div className={noteOnlyInPrint ? "hidden print:block" : undefined}>
-          <CoachReview note={sharedNote} />
-        </div>
       )}
 
       {/* Headline numbers */}

@@ -1,11 +1,15 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentUser, getLinksAsCoach } from "@/lib/data";
-import { acceptInvite, leaveClient } from "@/app/dashboard/actions";
+import { getLinksAsCoach } from "@/lib/data";
+import { getViewContext } from "@/lib/viewing";
+import {
+  acceptInvite,
+  leaveClient,
+  startViewingClient,
+} from "@/app/dashboard/actions";
 
 export default async function ClientsPage() {
   const supabase = await createClient();
-  const user = await getCurrentUser(supabase);
+  const { user, viewing } = await getViewContext();
   const links = await getLinksAsCoach(supabase, user);
   const pending = links.filter((l) => l.status === "pending");
   const active = links.filter((l) => l.status === "active");
@@ -33,9 +37,9 @@ export default async function ClientsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Clients</h1>
         <p className="mt-1 max-w-2xl text-sm text-[var(--muted)]">
-          People who have shared their reports with you. You have read-only
-          access to their reports and can write review notes on their
-          comparisons.
+          People who have shared their reports with you. Open a client&apos;s
+          account to see their Overview, Reports and Compare tabs exactly as
+          they do, read-only, for example while screen-sharing a session.
         </p>
       </div>
 
@@ -78,27 +82,33 @@ export default async function ClientsPage() {
           </p>
         ) : (
           <ul className="divide-y divide-[var(--border)]">
-            {active.map((l) => (
-              <li key={l.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
-                <Link href={`/dashboard/clients/${l.client_id}`} className="min-w-0 hover:underline">
-                  <div className="truncate font-medium">{name(l)}</div>
-                  <div className="text-sm text-[var(--muted)]">
-                    {counts.get(l.client_id) ?? 0} report
-                    {(counts.get(l.client_id) ?? 0) === 1 ? "" : "s"}
+            {active.map((l) => {
+              const n = counts.get(l.client_id) ?? 0;
+              const isOpen = viewing?.client_id === l.client_id;
+              return (
+                <li key={l.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                  <div className="min-w-0">
+                    <div className="truncate font-medium">{name(l)}</div>
+                    <div className="truncate text-sm text-[var(--muted)]">
+                      {l.client_email ? `${l.client_email} · ` : ""}
+                      {n} report{n === 1 ? "" : "s"}
+                    </div>
                   </div>
-                </Link>
-                <div className="flex gap-2">
-                  <Link href={`/dashboard/clients/${l.client_id}`} className="btn btn-ghost">
-                    Reports
-                  </Link>
-                  {(counts.get(l.client_id) ?? 0) >= 2 && (
-                    <Link href={`/dashboard/compare?client=${l.client_id}`} className="btn btn-primary">
-                      Compare
-                    </Link>
-                  )}
-                </div>
-              </li>
-            ))}
+                  <div className="flex gap-2">
+                    <form action={leaveClient.bind(null, l.id)}>
+                      <button type="submit" className="btn btn-ghost">
+                        Stop coaching
+                      </button>
+                    </form>
+                    <form action={startViewingClient.bind(null, l.client_id)}>
+                      <button type="submit" className="btn btn-primary">
+                        {isOpen ? "Viewing now" : "Open account"}
+                      </button>
+                    </form>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
