@@ -38,7 +38,8 @@ At [supabase.com](https://supabase.com), create a project. Then open the **SQL
 Editor** and run the contents of
 [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql). This
 creates the tables, row-level security policies, the private `reports` storage
-bucket, and the signup trigger.
+bucket, and the signup trigger. Then run the remaining files in
+`supabase/migrations/` in numeric order (e.g. `0002_fix_negotiator_traits.sql`).
 
 Enable email auth: **Authentication → Providers → Email** (magic links are on by
 default). Under **Authentication → URL Configuration**, add your site URL and

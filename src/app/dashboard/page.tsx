@@ -39,9 +39,16 @@ export default async function DashboardPage() {
             {reports.length} report{reports.length === 1 ? "" : "s"} tracked
           </p>
         </div>
-        <Link href="/dashboard/upload" className="btn btn-primary">
-          Upload a report
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          {reports.length >= 2 && (
+            <Link href="/dashboard/compare" className="btn btn-ghost">
+              Compare reports
+            </Link>
+          )}
+          <Link href="/dashboard/upload" className="btn btn-primary">
+            Upload a report
+          </Link>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">

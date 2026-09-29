@@ -12,9 +12,16 @@ export default async function ReportsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Reports</h1>
-        <Link href="/dashboard/upload" className="btn btn-primary">
-          Upload a report
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          {reports.length >= 2 && (
+            <Link href="/dashboard/compare" className="btn btn-ghost">
+              Compare
+            </Link>
+          )}
+          <Link href="/dashboard/upload" className="btn btn-primary">
+            Upload a report
+          </Link>
+        </div>
       </div>
 
       {reports.length === 0 ? (

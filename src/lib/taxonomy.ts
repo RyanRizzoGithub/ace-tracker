@@ -85,8 +85,8 @@ export const ARCHETYPES: Archetype[] = [
     topValue: "Facilitating moments of agreement.",
     blurb:
       "Negotiators are looking for moments of agreement and they are at their best when the environment balances the need for results and relationships. They perform well in the toughest situations because they do not tend to overreact. They believe winning together is better but this can cause them to take longer than expected to get results. They are in constant tension between getting along and getting things done.",
-    authentic: { type: "AC", traits: ["Navigative", "Facilitative", "Steering"] },
-    shadow: { type: "OC", traits: ["Consensus-building", "Political", "Aligning"] },
+    authentic: { type: "AC", traits: ["Navigative", "Facilitative", "Aligning"] },
+    shadow: { type: "OC", traits: ["Consensus-building", "Political", "Steering"] },
   },
   {
     key: "driver",
