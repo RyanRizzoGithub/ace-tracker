@@ -61,6 +61,13 @@ function PlanTrait({
   );
 }
 
+/**
+ * The paired-trait check (each profile's authentic side against its over- or
+ * under-confidence side) is hidden for now. Set to true to bring back both
+ * the section and its line in "How these numbers are calculated".
+ */
+const SHOW_PAIRED_TRAIT_CHECK: boolean = false;
+
 const DIRECTION_STYLES: Record<Direction, { color: string; bg: string; label: string }> = {
   better: { color: "var(--teal-dark)", bg: "var(--teal-light)", label: "better" },
   worse: { color: "var(--coral)", bg: "var(--coral-light)", label: "worth watching" },
@@ -421,6 +428,7 @@ export default function ComparisonView({
       </section>
 
       {/* Paired-trait check */}
+      {SHOW_PAIRED_TRAIT_CHECK && (
       <section className="card p-6">
         <h2 className="text-lg font-semibold">Paired-trait check</h2>
         <p className="mb-4 text-sm text-[var(--muted)]">
@@ -500,6 +508,7 @@ export default function ComparisonView({
           })}
         </div>
       </section>
+      )}
 
       {c.feedback.some((f) => f.before || f.after) && (
         <section className="card p-6">
@@ -625,13 +634,15 @@ export default function ComparisonView({
             traits) and the under-confidence average (9 traits). Above 1 means
             authentic confidence outweighs the shadow sides.
           </li>
-          <li>
-            <strong>Paired-trait check.</strong> For each profile, the average
-            change across its three authentic traits is compared with the
-            average change across its three over- or under-confidence traits.
-            A side counts as having moved when its average shifts by{" "}
-            {"≥"} 0.2 points.
-          </li>
+          {SHOW_PAIRED_TRAIT_CHECK && (
+            <li>
+              <strong>Paired-trait check.</strong> For each profile, the
+              average change across its three authentic traits is compared
+              with the average change across its three over- or
+              under-confidence traits. A side counts as having moved when its
+              average shifts by {"≥"} 0.2 points.
+            </li>
+          )}
         </ul>
       </details>
     </div>
