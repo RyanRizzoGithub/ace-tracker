@@ -13,7 +13,6 @@ import { profileDetails } from "@/lib/profile-content";
 import { FEEDBACK_QUADRANTS, feedbackValue } from "@/lib/feedback";
 import ProfileSections from "@/components/ProfileSections";
 import TraitInfo from "@/components/TraitInfo";
-import DevelopmentPlanForm from "@/components/DevelopmentPlanForm";
 import { saveFeedback } from "@/app/dashboard/actions";
 import type { ScoreRow } from "@/lib/types";
 
@@ -127,7 +126,8 @@ export default async function ReportDetailPage({
         </div>
       )}
 
-      <DevelopmentPlanForm reportId={report.id} plan={report.plan} editable={isOwner} />
+      {/* The development plan card (DevelopmentPlanForm) is hidden for now.
+          Saved plans still feed "Where you started" on the Compare page. */}
 
       <div>
         <h2 className="mb-1 text-lg font-semibold">Trait scores</h2>
