@@ -34,9 +34,9 @@ trait and archetype over time.
 - **Development plans** are recorded per report, typed in or imported from the
   last page of the Confidence Traits report PDF (`POST /api/extract-plan`).
 - **Trait definitions** for all 36 traits are in
-  [`src/lib/trait-content.ts`](src/lib/trait-content.ts). The file ships with
-  original summaries. To use the official wording from a Confidence Traits
-  report PDF you have the right to use, run
+  [`src/lib/trait-content.ts`](src/lib/trait-content.ts). It holds the official
+  wording from the Confidence Traits report (© BenFauske.com, used with
+  permission) and is generated, not hand-edited. To refresh it, run
   `npm run import-traits -- "path/to/report.pdf"` (add `--check` to preview
   without writing). It rewrites that file only if all 36 traits are found.
 - **Coach sharing:** a client invites a coach by email (`/dashboard/sharing`).
