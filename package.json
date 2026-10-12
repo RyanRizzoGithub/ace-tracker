@@ -6,7 +6,8 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "lint": "eslint"
+        "lint": "eslint",
+        "import-traits": "node --no-warnings scripts/import-trait-definitions.mjs"
     },
     "dependencies": {
         "@anthropic-ai/sdk": "^0.122.0",
@@ -25,6 +26,7 @@
         "@types/react-dom": "^19",
         "eslint": "^9",
         "eslint-config-next": "16.3.3",
+        "pdfjs-dist": "^6.4.299",
         "tailwindcss": "^4",
         "typescript": "^5"
     }

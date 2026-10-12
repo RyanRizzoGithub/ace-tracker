@@ -3,8 +3,9 @@
  *
  * These are ORIGINAL SUMMARIES written for ACE Tracker, based on the meaning of
  * each trait in the Confidence Traits report (© BenFauske.com). They are
- * deliberately not the report's wording. If you hold rights to the original
- * definitions and want them shown verbatim, replace the strings here — every
+ * deliberately not the report's wording. To show the official definitions
+ * instead, run scripts/import-trait-definitions.mjs against a Confidence
+ * Traits report PDF you have the right to use; it regenerates this file. Every
  * view reads from this one map.
  *
  * - `summary`: what the trait is.
